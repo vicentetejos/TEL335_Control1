@@ -39,14 +39,14 @@ const promotion_rules = [
     }
     
   function promotionNx$(amount, unit_base_price){
-    var total_final=0;
+    let total_final=0;
     var total = amount*unit_base_price;
     var descuento = total*porcentaje_N/100;
     total_final = total - descuento;
     return total_final;
     }
     function promotionAyA(amount, unit_base_price){
-    var total_final=0;
+    let total_final=0;
     var total = amount*unit_base_price;
     var descuento = total*porcentaje_AyA/100;
     total_final = total - descuento;
@@ -56,16 +56,29 @@ const promotion_rules = [
    
     // format data cart_id e items
     // item_id, promotion, amount, unit_base_price
-var final =[]
-var items=[]
     app.post('/api/get-promotions', (req, res) => {
+    const final =[]
+        const items=[]
   
 
         const newData = req.body;
         
         for (let i=0; i< newData.items.length; i++){
+            console.log(newData.items[i])
+            if (newData.items[i].promotion==undefined || newData.items[i].amount==undefined || newData.items[i].unit_base_price==undefined){
+    
+                var respuestax=[{
+                    "status": "NOK",
+                    "error_message": "INTERNAL SERVER ERROR"
+                    }]
+                
+                res.send(respuestax)
+                break
             
-            if (newData.items[i].promotion=='Nx$' || newData.items[i].promotion=='AyA'){
+            }else{
+            
+                
+                if (newData.items[i].promotion=='Nx$' || newData.items[i].promotion=='AyA'){
                 if (newData.items[i].amount <= 0 || newData.items[i].unit_base_price <=0){
                     var respuesta2=[{
                         "status": "NOK",
@@ -118,21 +131,9 @@ var items=[]
                                                
                         
                     }
-                var precio_total=0;
-                for (let i=0; i<items.length; i++){
-                    precio_total += items[i].total_price;
-                }
-                   final =[{"status":"OK",
-                   "cart_id": newData.cart_id,
-                   "total_cart_amount": precio_total,
-                   "details":[{
-                        items
-                    }]
-                    }]
+                
                     
                 }
-                res.send(final)
-                
     
                 }   
             else{
@@ -142,8 +143,24 @@ var items=[]
                     }]
                 res.send(respuesta)
             }
-            
         }
+            
+            
+    }
+    var precio_total_t=0;
+                /* console.log(items) */
+                for (let i=0; i<items.length; i++){
+                    precio_total_t += items[i].total_price;
+                }
+                   final.push([{"status":"OK",
+                   "cart_id": newData.cart_id,
+                   "total_cart_amount": precio_total_t,
+                   "details":[{
+                        items
+                    }]
+                    }])
+    res.send(final)
+                
         
        
     });
